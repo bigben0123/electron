@@ -55,8 +55,17 @@ void AtomJavaScriptDialogManager::RunJavaScriptDialog(
     return std::move(callback).Run(false, base::string16());
   }
 
+#if 1  // zhibin:patch not alert popup
+  if (true) {
+    int tistar_dialog_type =
+        dialog_type == JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_ALERT ? 1
+                                                                          : 2;
+    api_web_contents_->Emit("tistar-dialog-event", tistar_dialog_type,
+                            base::UTF16ToUTF8(message_text));
+#else
   if (dialog_type != JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_ALERT &&
       dialog_type != JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_CONFIRM) {
+#endif
     std::move(callback).Run(false, base::string16());
     return;
   }
