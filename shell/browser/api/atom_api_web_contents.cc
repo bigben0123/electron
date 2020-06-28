@@ -1003,7 +1003,21 @@ void WebContents::DidFinishLoad(content::RenderFrameHost* render_frame_host,
   if (is_main_frame)
     Emit("did-finish-load");
 }
-
+#ifndef CONFIG_NO_NOTIFY_ADD_EVENT_LISTENER_CALLED  // zhibin:patch_message ipc
+void WebContents::DidAddEventListenerCalledClient(
+    content::RenderFrameHost* render_frame_host,
+    const std::string& node_name,
+    const std::string& event_type) {
+  /*
+    bool is_main_frame = !render_frame_host->GetParent();
+    int frame_process_id = render_frame_host->GetProcess()->GetID();
+    int frame_routing_id = render_frame_host->GetRoutingID();
+    Emit("did-frame-finish-load", is_main_frame, frame_process_id,
+         frame_routing_id);
+  */
+  Emit("event-demo", node_name, event_type);
+}
+#endif
 void WebContents::DidFailLoad(content::RenderFrameHost* render_frame_host,
                               const GURL& url,
                               int error_code,

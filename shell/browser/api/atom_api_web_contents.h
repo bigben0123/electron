@@ -455,6 +455,13 @@ class WebContents : public mate::TrackableObject<WebContents>,
       content::RenderFrameHost* render_frame_host) override;
   void DidFinishLoad(content::RenderFrameHost* render_frame_host,
                      const GURL& validated_url) override;
+#ifndef CONFIG_NO_NOTIFY_ADD_EVENT_LISTENER_CALLED  // zhibin:patch_message ipc
+  void DidAddEventListenerCalledClient(
+      content::RenderFrameHost* render_frame_host,
+      const std::string& node_name,
+      const std::string& event_type) override;
+#endif
+
   void DidFailLoad(content::RenderFrameHost* render_frame_host,
                    const GURL& validated_url,
                    int error_code,
