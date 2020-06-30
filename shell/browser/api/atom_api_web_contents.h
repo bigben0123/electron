@@ -461,7 +461,6 @@ class WebContents : public mate::TrackableObject<WebContents>,
       const std::string& node_name,
       const std::string& event_type) override;
 #endif
-
   void DidFailLoad(content::RenderFrameHost* render_frame_host,
                    const GURL& validated_url,
                    int error_code,
