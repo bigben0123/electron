@@ -54,12 +54,13 @@ void AtomJavaScriptDialogManager::RunJavaScriptDialog(
   if (origin_counts_[origin] == kUserWantsNoMoreDialogs) {
     return std::move(callback).Run(false, base::string16());
   }
-#ifndef CONFIG_NO_IGNORE_DIALOG  // zhibin:patch not alert popup
+#ifndef CUST_NO_EVENT_IGNORE_POPUP_WINDOW  // zhibin:patch not alert popup
   if (true) {
     int tistar_dialog_type =
-        dialog_type == JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_ALERT ? 1
-                                                                          : 2;
-    api_web_contents_->Emit("tistar-dialog-event", tistar_dialog_type,
+        dialog_type == JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_CONFIRM ? 2
+                                                                            : 1;
+    api_web_contents_->Emit("cust_event_notify_popup_window",
+                            tistar_dialog_type,
                             base::UTF16ToUTF8(message_text));
 #else
   if (dialog_type != JavaScriptDialogType::JAVASCRIPT_DIALOG_TYPE_ALERT &&
