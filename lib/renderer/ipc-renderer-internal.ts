@@ -14,6 +14,16 @@ if (!ipcRendererInternal.send) {
     return binding.ipc.sendSync(internal, channel, args)[0];
   };
 
+  //zhibin:cust_event_notify_dialog_confirm begin define
+  ipcRendererInternal.sendSyncEx = function (channel, ...args) {
+    return binding.ipc.sendSync(false, channel, args)[0]; 
+  };
+
+  ipcRendererInternal.sendEx = function (channel, ...args) {
+    return binding.ipc.send(false, channel, args)[0];
+  };
+  // cust_event_notify_dialog_confirm  end
+
   ipcRendererInternal.sendTo = function (webContentsId, channel, ...args) {
     return binding.ipc.sendTo(internal, false, webContentsId, channel, args);
   };

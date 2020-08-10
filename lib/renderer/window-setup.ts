@@ -303,6 +303,13 @@ export const windowSetup = (
     };
     if (shouldUseContextBridge) internalContextBridge.overrideGlobalValueFromIsolatedWorld(['history', 'back'], window.history.back);
 
+  //zhibin:cust_event_notify_dialog_confirm begin
+    window.confirm = function (message?: string | undefined): boolean {
+      return ipcRendererInternal.sendSyncEx('cust_event_notify_dialog_confirm',message);
+    };
+    if (shouldUseContextBridge) internalContextBridge.overrideGlobalValueFromIsolatedWorld(['confirm'], window.confirm);
+  // cust_event_notify_dialog_confirm  end
+
     window.history.forward = function () {
       ipcRendererInternal.send('ELECTRON_NAVIGATION_CONTROLLER_GO_FORWARD');
     };

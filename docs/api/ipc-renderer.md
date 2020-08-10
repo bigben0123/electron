@@ -62,6 +62,18 @@ hence no functions or prototype chain will be included.
 The main process handles it by listening for `channel` with the
 [`ipcMain`](ipc-main.md) module.
 
+### `ipcRenderer.sendEx(channel, ...args)`
+
+* `channel` String
+* `...args` any[]
+
+Send a message to the main process asynchronously via `channel`, you can also
+send arbitrary arguments. Arguments will be serialized as JSON internally and
+hence no functions or prototype chain will be included.
+
+The main process handles it by listening for `channel` with the
+[`ipcMain`](ipc-main.md) module.
+
 ### `ipcRenderer.invoke(channel, ...args)`
 
 * `channel` String
@@ -91,6 +103,23 @@ ipcMain.handle('some-name', async (event, someArgument) => {
 ```
 
 ### `ipcRenderer.sendSync(channel, ...args)`
+
+* `channel` String
+* `...args` any[]
+
+Returns `any` - The value sent back by the [`ipcMain`](ipc-main.md) handler.
+
+Send a message to the main process synchronously via `channel`, you can also
+send arbitrary arguments. Arguments will be serialized in JSON internally and
+hence no functions or prototype chain will be included.
+
+The main process handles it by listening for `channel` with [`ipcMain`](ipc-main.md) module,
+and replies by setting `event.returnValue`.
+
+**Note:** Sending a synchronous message will block the whole renderer process,
+unless you know what you are doing you should never use it.
+
+### `ipcRenderer.sendSyncEx(channel, ...args)`
 
 * `channel` String
 * `...args` any[]
