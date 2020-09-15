@@ -78,8 +78,10 @@ class Session : public mate::TrackableObject<Session>,
   std::string GetUserAgent();
   v8::Local<v8::Promise> GetBlobData(v8::Isolate* isolate,
                                      const std::string& uuid);
+#ifndef CUST_NO_FEATURE_CACHE_DATA  // zhibin:
   v8::Local<v8::Promise> GetCacheData(mate::Arguments* args,
                                       const std::string& url);
+#endif
   void CreateInterruptedDownload(const mate::Dictionary& options);
   void SetPreloads(const std::vector<base::FilePath::StringType>& preloads);
   std::vector<base::FilePath::StringType> GetPreloads() const;

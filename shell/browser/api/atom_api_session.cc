@@ -5,7 +5,6 @@
 #include "shell/browser/api/atom_api_session.h"
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -277,6 +276,7 @@ v8::Local<v8::Promise> Session::GetCacheSize() {
   return handle;
 }
 
+#ifndef CUST_NO_FEATURE_CACHE_DATA  // zhibin:
 v8::Local<v8::Promise> Session::GetCacheData(mate::Arguments* args,
                                              const std::string& url) {
   auto* isolate = v8::Isolate::GetCurrent();
@@ -285,7 +285,7 @@ v8::Local<v8::Promise> Session::GetCacheData(mate::Arguments* args,
 
   content::BrowserContext::GetDefaultStoragePartition(browser_context_.get())
       ->GetNetworkContext()
-      ->ComputeHttpCacheSize0(
+      ->ComputeHttpCacheData(
           base::Time(), base::Time::Max(), url,
           base::BindOnce(
               [](util::Promise promise, const std::vector<int8_t>& buffer,
@@ -304,6 +304,7 @@ v8::Local<v8::Promise> Session::GetCacheData(mate::Arguments* args,
 
   return handle;
 }
+#endif
 
 v8::Local<v8::Promise> Session::ClearCache() {
   auto* isolate = v8::Isolate::GetCurrent();
@@ -739,7 +740,9 @@ void Session::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setUserAgent", &Session::SetUserAgent)
       .SetMethod("getUserAgent", &Session::GetUserAgent)
       .SetMethod("getBlobData", &Session::GetBlobData)
+#ifndef CUST_NO_FEATURE_CACHE_DATA  // zhibin:
       .SetMethod("getCacheData", &Session::GetCacheData)
+#endif
       .SetMethod("createInterruptedDownload",
                  &Session::CreateInterruptedDownload)
       .SetMethod("setPreloads", &Session::SetPreloads)
