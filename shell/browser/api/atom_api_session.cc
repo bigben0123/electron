@@ -5,12 +5,12 @@
 #include "shell/browser/api/atom_api_session.h"
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/guid.h"
@@ -273,6 +273,34 @@ v8::Local<v8::Promise> Session::GetCacheSize() {
                                    }
                                  },
                                  std::move(promise)));
+
+  return handle;
+}
+
+v8::Local<v8::Promise> Session::GetCacheData(mate::Arguments* args,
+                                             const std::string& url) {
+  auto* isolate = v8::Isolate::GetCurrent();
+  auto promise = util::Promise(isolate);
+  auto handle = promise.GetHandle();
+
+  content::BrowserContext::GetDefaultStoragePartition(browser_context_.get())
+      ->GetNetworkContext()
+      ->ComputeHttpCacheSize0(
+          base::Time(), base::Time::Max(), url,
+          base::BindOnce(
+              [](util::Promise promise, const std::vector<int8_t>& buffer,
+                 int64_t size_or_error) {
+                if (size_or_error < 0) {
+                  promise.RejectWithErrorMessage(
+                      net::ErrorToString(size_or_error));
+                } else {
+                  promise.Resolve(node::Buffer::Copy(v8::Isolate::GetCurrent(),
+                                                     (const char*)buffer.data(),
+                                                     buffer.size())
+                                      .ToLocalChecked());
+                }
+              },
+              std::move(promise)));
 
   return handle;
 }
@@ -711,6 +739,7 @@ void Session::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setUserAgent", &Session::SetUserAgent)
       .SetMethod("getUserAgent", &Session::GetUserAgent)
       .SetMethod("getBlobData", &Session::GetBlobData)
+      .SetMethod("getCacheData", &Session::GetCacheData)
       .SetMethod("createInterruptedDownload",
                  &Session::CreateInterruptedDownload)
       .SetMethod("setPreloads", &Session::SetPreloads)
