@@ -290,9 +290,8 @@ v8::Local<v8::Promise> Session::GetCacheData(mate::Arguments* args,
           base::BindOnce(
               [](util::Promise promise, const std::vector<int8_t>& buffer,
                  int64_t size_or_error) {
-                if (size_or_error < 0) {
-                  promise.RejectWithErrorMessage(
-                      net::ErrorToString(size_or_error));
+                if (size_or_error <= 0) {
+                  promise.RejectWithErrorMessage("Not Found.");
                 } else {
                   promise.Resolve(node::Buffer::Copy(v8::Isolate::GetCurrent(),
                                                      (const char*)buffer.data(),
