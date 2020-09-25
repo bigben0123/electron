@@ -21,6 +21,10 @@
 #include "shell/common/gin_converters/net_converter_gin_adapter.h"
 #include "shell/common/gin_converters/std_converter.h"
 #include "shell/common/gin_converters/value_converter_gin_adapter.h"
+#ifndef CUST_NO_CHARSET_WORKROUND
+#include "base/strings/utf_string_conversions.h"
+#include "net/base/net_string_util.h"
+#endif
 
 namespace gin {
 
@@ -100,6 +104,37 @@ bool MatchesFilterCondition(extensions::WebRequestInfo* info,
   return false;
 }
 
+#ifndef CUST_NO_CHARSET_WORKROUND
+
+bool DecodeWord(const std::string& encoded_word,
+                std::string referrer_charset,
+                bool* is_rfc2047,
+                std::string* output) {
+  *is_rfc2047 = false;
+  output->clear();
+  if (encoded_word.empty())
+    return true;
+
+  if (!base::IsStringASCII(encoded_word)) {
+    // Try UTF-8, referrer_charset and the native OS default charset in turn.
+    if (base::IsStringUTF8(encoded_word)) {
+      *output = encoded_word;
+    } else {
+      referrer_charset = "GB18030";
+      base::string16 utf16_output;
+      if (!referrer_charset.empty() &&
+          net::ConvertToUTF16(encoded_word, referrer_charset.c_str(),
+                              &utf16_output)) {
+        *output = base::UTF16ToUTF8(utf16_output);
+      } else {
+        *output = base::WideToUTF8(base::SysNativeMBToWide(encoded_word));
+      }
+    }
+  }
+  return true;
+}
+#endif
+
 // Convert HttpResponseHeaders to V8.
 //
 // Note that while we already have converters for HttpResponseHeaders, we can
@@ -116,6 +151,19 @@ v8::Local<v8::Value> HttpResponseHeadersToV8(
       base::Value* values = response_headers.FindListKey(key);
       if (!values)
         values = response_headers.SetKey(key, base::ListValue());
+#ifndef CUST_NO_CHARSET_WORKROUND
+      {
+        if (base::EqualsCaseInsensitiveASCII("Content-Disposition", key) &&
+            !value.empty()) {
+          std::string decoded;
+          bool is_previous_token_rfc2047 = true;
+          if (DecodeWord(value, "", &is_previous_token_rfc2047, &decoded)) {
+            value = decoded;
+          }
+        }
+      }
+#endif
+
       values->GetList().emplace_back(value);
     }
   }
